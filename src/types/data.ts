@@ -1,6 +1,6 @@
 
 export interface IToDo {
-    userId: number,
+    userId?: number,
     id: number,
     title: string,
     completed: boolean

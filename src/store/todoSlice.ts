@@ -1,25 +1,26 @@
 import { createSlice, PayloadAction, createAsyncThunk } from "@reduxjs/toolkit";
+import { IToDo } from "../types/data";
 
-type ITodo = {
-    id: string;
-    title: string;
-    completed: boolean;
-}
+// interface ITodo  {
+//     id: number;
+//     title: string;
+//     completed: boolean;
+// }
 
 
 type ITodoState = {
-    list: ITodo[];
-    loading: string | null;
+    list: IToDo[];
+    loading: boolean;
     error: string | null;
 }
 
 const initialState: ITodoState = {
     list: [],
-    loading: null,
+    loading: false,
     error: null
 }
 
-export const fetchTodos = createAsyncThunk<ITodo[], undefined, { rejectValue: { error: string } }>(
+export const fetchTodos = createAsyncThunk<IToDo[], undefined, { rejectValue: { error: string } }>(
     "todos/fetchTodos",
     async function (_, { rejectWithValue }) {
         const response = await fetch("https://jsonplaceholder.typicode.com/todos?_limit=10");
@@ -33,6 +34,22 @@ export const fetchTodos = createAsyncThunk<ITodo[], undefined, { rejectValue: { 
     }
 )
 
+export const fetchRemoveTodo = createAsyncThunk<number, number, { rejectValue: { error: string } }>(
+    "todos/fetchRemoveTodo",
+    async function (id, { rejectWithValue }) {
+        const response = await fetch(`https://jsonplaceholder.typicode.com/todos/${id}`, {
+            method: "DELETE"
+        });
+        if (!response.ok) {
+            return rejectWithValue({ error: "Cant't delete task! server error" })
+        }
+
+
+        return id;
+
+    }
+)
+
 
 
 const todoSlice = createSlice({
@@ -41,35 +58,43 @@ const todoSlice = createSlice({
     reducers: {
         addTodo: (state, action: PayloadAction<string>) => {
             state.list.push({
-                id: new Date().toISOString(),
+                id: Math.random() * 1000,
                 title: action.payload,
                 completed: false
             })
         },
-        toggleCompleted: (state, action: PayloadAction<string>) => {
+        toggleCompleted: (state, action: PayloadAction<number>) => {
             const completeTodo = state.list.find(todo => todo.id === action.payload);
             if (completeTodo) {
                 completeTodo.completed = !completeTodo.completed
             }
 
         },
-        removeTodo: (state, action: PayloadAction<string>) => {
+        removeTodo: (state, action: PayloadAction<number>) => {
             state.list = state.list.filter(todo => todo.id !== action.payload)
         }
     },
     extraReducers: (builder) => {
         builder
             .addCase(fetchTodos.pending, (state) => {
-                state.loading = "loading";
+                state.loading = true;
                 state.error = null;
             })
             .addCase(fetchTodos.fulfilled, (state, action) => {
-                state.loading = null;
+                state.loading = false;
                 state.error = null;
                 state.list = action.payload;
             })
             .addCase(fetchTodos.rejected, (state, action) => {
-                state.loading = null;
+                state.loading = false;
+                state.error = action.payload!.error;
+            })
+
+            .addCase(fetchRemoveTodo.fulfilled, (state, action) => {
+                state.list = state.list.filter(todo => todo.id !== action.payload);
+            })
+            .addCase(fetchRemoveTodo.rejected, (state, action) => {
+                state.loading = false;
                 state.error = action.payload!.error;
             })
     }

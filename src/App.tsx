@@ -1,64 +1,39 @@
-import { useState, useEffect, useRef } from 'react';
-import { IToDo } from './types/data';
-import { TodoList } from './components/TodoList';
+import TodoList from './components/TodoList'
+
 import './App.css'
+import { useEffect, useState } from 'react'
 import { useAppDispatch, useAppSelector } from './hooks/hook';
-import { fetchTodos } from './store/todoSlice';
+import { addTodo, fetchTodos } from './store/todoSlice';
+
+
 
 const App: React.FC = () => {
-  const list = useAppSelector(state => state.todos.list);
-
-  console.log(list)
-  const [value, setValue] = useState("");
-  // const [todos, setTodos] = useState<IToDo[]>([]);
-
+  const { list, loading } = useAppSelector(state => state.todos);
+  const [text, setText] = useState("");
   const dispach = useAppDispatch();
-  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (inputRef.current) inputRef.current.focus();
     dispach(fetchTodos())
   }, [])
 
-  const onHandleChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
-    setValue(e.target.value);
-  }
 
-
-  const addTodo = () => {
-    // if (value) {
-    //   setTodos([...todos, {
-    //     id: Date.now(),
-    //     title: value,
-    //     complete: false
-    //   }])
-    //   setValue("");
-    // }
-  }
-
-  const removeTodo = (id: number): void => {
-    // setTodos(todos.filter(todo => todo.id !== id));
-  }
-
-  const toggleTodo = (id: number): void => {
-    // setTodos(todos.map(todo => {
-    //   if (todo.id !== id) {
-    //     return todo
-    //   } else {
-    //     return { ...todo, complete: !todo.complete }
-    //   }
-    // }));
+  const onAddToto: React.MouseEventHandler<HTMLButtonElement> = () => {
+    if (text) {
+      dispach(addTodo(text));
+      setText("");
+    }
   }
 
   return (
-    <div>
-      <input name='todoInput' value={value} onChange={onHandleChange} ref={inputRef} />
-      <button onClick={addTodo} >Add</button>
-      <div>
-        <TodoList items={list} removeTodo={removeTodo} toggleTodo={toggleTodo} />
-      </div>
-    </div>
 
+    <div>
+      <input type="text" onChange={e => setText(e.target.value)} value={text} style={{ marginRight: "10px" }} />
+      <button onClick={onAddToto}>Add todo</button>
+      {loading ? <div>Loading...</div> : null}
+      {<TodoList list={list} />}
+
+
+    </div>
 
   )
 }
