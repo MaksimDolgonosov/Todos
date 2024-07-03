@@ -1,5 +1,6 @@
 import { IToDo } from "../types/data"
 import { TodoItem } from "./TodoItem"
+// import { useAppSelector } from "../hooks/hook"
 
 interface ITodoListProps {
     items: IToDo[],
@@ -9,7 +10,9 @@ interface ITodoListProps {
 
 
 
-const TodoList = (props: ITodoListProps) => {
+const TodoList = (props) => {
+    // const list = useAppSelector(state => state.todos.list);
+
     return (
         <div>
             {props.items.map(todo => <TodoItem

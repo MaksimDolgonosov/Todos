@@ -8,10 +8,10 @@ interface ITodoItem extends IToDo {
 
 
 const TodoItem: React.FC<ITodoItem> = (props) => {
-    const { title, complete, removeTodo,toggleTodo, id } = props;
+    const { title, completed, removeTodo,toggleTodo, id } = props;
     return (
         <div>
-            <input type="checkbox" checked={complete} onChange={()=>toggleTodo(id)}/>
+            <input type="checkbox" checked={completed} onChange={()=>toggleTodo(id)}/>
             {title}
             <button onClick={()=>removeTodo(id)}>X</button>
         </div>
